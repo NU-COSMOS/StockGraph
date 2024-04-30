@@ -15,6 +15,7 @@ class Application(tkinter.Frame):
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def create_widgets(self):
         # テキストボックス
@@ -33,7 +34,6 @@ class Application(tkinter.Frame):
         self.fig, self.ax = plt.subplots(figsize=(12, 4))
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.get_tk_widget().pack()
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def on_close(self):
         # Tkinterウィンドウが閉じられる時に呼ばれる
