@@ -13,6 +13,7 @@ class Application(tkinter.Frame):
         self.config = config
         self.screen_width = w
         self.screen_height = h
+        self.is_drawn = True
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
@@ -35,6 +36,11 @@ class Application(tkinter.Frame):
         submit_btn["command"] = self.display_graph
         submit_btn.pack()
 
+        clear_btn = tkinter.Button(self.control_pannel)
+        clear_btn["text"] = "clear"
+        clear_btn["command"] = self.clear_graph
+        clear_btn.pack()
+
         plt.rcParams["font.size"] = 7
         self.fig, self.ax = plt.subplots()
         # 画面サイズに合わせて図のサイズを設定
@@ -48,6 +54,11 @@ class Application(tkinter.Frame):
 
         self.graph_area.pack(side="left")
         self.control_pannel.pack()
+
+    def clear_graph(self):
+        self.ax.clear()
+        self.ax.grid()
+        self.canvas.draw()
 
     def on_close(self):
         plt.close()
@@ -64,7 +75,7 @@ class Application(tkinter.Frame):
         date_list = daily_data.keys()
         close_list = [float(x["4. close"]) for x in daily_data.values()]
 
-        self.ax.clear()
+        # self.ax.clear()
         self.ax.plot(date_list, close_list)
         self.ax.xaxis.set_major_locator(mdates.DayLocator(interval=15))
         self.ax.grid()
