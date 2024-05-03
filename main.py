@@ -11,6 +11,8 @@ class Application(tkinter.Frame):
         super().__init__(root, width=w, height=h)
         self.root = root
         self.config = config
+        self.screen_width = w
+        self.screen_height = h
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
