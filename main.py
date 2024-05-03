@@ -13,7 +13,6 @@ class Application(tkinter.Frame):
         self.config = config
         self.screen_width = w
         self.screen_height = h
-        self.is_drawn = True
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
@@ -31,15 +30,16 @@ class Application(tkinter.Frame):
         self.text_box["width"] = 10
         self.text_box.pack()
 
-        submit_btn = tkinter.Button(self.control_pannel)
-        submit_btn["text"] = "実行"
-        submit_btn["command"] = self.display_graph
-        submit_btn.pack()
+        show_btn = tkinter.Button(self.control_pannel)
+        show_btn["text"] = "show"
+        show_btn["command"] = self.display_graph
+        show_btn.pack()
 
-        clear_btn = tkinter.Button(self.control_pannel)
-        clear_btn["text"] = "clear"
-        clear_btn["command"] = self.clear_graph
-        clear_btn.pack()
+        self.clear_btn = tkinter.Button(self.control_pannel)
+        self.clear_btn["text"] = "clear"
+        self.clear_btn["command"] = self.clear_graph
+        self.clear_btn["state"] = "disabled"
+        self.clear_btn.pack()
 
         plt.rcParams["font.size"] = 7
         self.fig, self.ax = plt.subplots()
@@ -59,6 +59,7 @@ class Application(tkinter.Frame):
         self.ax.clear()
         self.ax.grid()
         self.canvas.draw()
+        self.clear_btn["state"] = "disabled"
 
     def on_close(self):
         plt.close()
@@ -75,11 +76,12 @@ class Application(tkinter.Frame):
         date_list = daily_data.keys()
         close_list = [float(x["4. close"]) for x in daily_data.values()]
 
-        # self.ax.clear()
         self.ax.plot(date_list, close_list)
         self.ax.xaxis.set_major_locator(mdates.DayLocator(interval=15))
         self.ax.grid()
         self.canvas.draw()
+
+        self.clear_btn["state"] = "normal"
 
 
 def main():
