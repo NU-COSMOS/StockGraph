@@ -21,19 +21,33 @@ class Application(tkinter.Frame):
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def create_widgets(self):
-        self.text_box = tkinter.Entry(self)
+        # グラフ表示エリア
+        self.graph_area = tkinter.Frame(self)
+        # コントロールパネル
+        self.control_pannel = tkinter.Frame(self)
+
+        self.text_box = tkinter.Entry(self.control_pannel)
         self.text_box["width"] = 10
         self.text_box.pack()
 
-        submit_btn = tkinter.Button(self)
+        submit_btn = tkinter.Button(self.control_pannel)
         submit_btn["text"] = "実行"
         submit_btn["command"] = self.display_graph
         submit_btn.pack()
 
         plt.rcParams["font.size"] = 7
-        self.fig, self.ax = plt.subplots(figsize=(12, 4))
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
-        self.canvas.get_tk_widget().pack()
+        self.fig, self.ax = plt.subplots()
+        # 画面サイズに合わせて図のサイズを設定
+        canvas_width = int(self.screen_width * 0.7)
+        canvas_height = self.screen_height
+        self.fig.set_size_inches(
+            canvas_width / self.fig.dpi, canvas_height / self.fig.dpi
+        )
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.graph_area)
+        self.canvas.get_tk_widget().pack(fill=tkinter.BOTH, expand=True)
+
+        self.graph_area.pack(side="left")
+        self.control_pannel.pack()
 
     def on_close(self):
         plt.close()
