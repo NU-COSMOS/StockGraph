@@ -1,4 +1,3 @@
-import os
 import requests
 import tkinter
 import matplotlib.pyplot as plt
@@ -15,30 +14,28 @@ class Application(tkinter.Frame):
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
+
+        # Tkinterのwindowが閉じられるときの処理
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def create_widgets(self):
-        # テキストボックス
         self.text_box = tkinter.Entry(self)
         self.text_box["width"] = 10
         self.text_box.pack()
 
-        # 実行ボタン
         submit_btn = tkinter.Button(self)
         submit_btn["text"] = "実行"
         submit_btn["command"] = self.display_graph
         submit_btn.pack()
 
-        # グラフ
         plt.rcParams["font.size"] = 7
         self.fig, self.ax = plt.subplots(figsize=(12, 4))
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.get_tk_widget().pack()
 
     def on_close(self):
-        # Tkinterウィンドウが閉じられる時に呼ばれる
-        plt.close()  # Matplotlibのプロットを閉じる
-        self.root.destroy()  # Tkinterウィンドウを閉じる
+        plt.close()
+        self.root.destroy()
 
     def display_graph(self):
         symbol = self.text_box.get()
@@ -65,7 +62,6 @@ def main():
     root = tkinter.Tk()
     root.title("StockGraph")
     root.state("normal")
-    # root.geometry("700x300")
     app = Application(
         root=root,
         config=config["DEFAULT"],
