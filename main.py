@@ -7,7 +7,7 @@ import configparser
 
 
 class Application(tkinter.Frame):
-    def __init__(self, root=None, config=None, w=None, h=None):
+    def __init__(self, root: tkinter.Tk = None, config=None, w=None, h=None):
         super().__init__(root, width=w, height=h)
         self.root = root
         self.config = config
@@ -28,17 +28,14 @@ class Application(tkinter.Frame):
         # コントロールパネル
         self.control_pannel = tkinter.Frame(self)
 
-        # 表示中の株一覧表示エリア
-        self.stock_list_area = tkinter.Frame(self.control_pannel)
-
         self.text_box = tkinter.Entry(self.control_pannel)
         self.text_box["width"] = 10
         self.text_box.pack()
 
-        show_btn = tkinter.Button(self.control_pannel)
-        show_btn["text"] = "show"
-        show_btn["command"] = self.click_show_btn
-        show_btn.pack()
+        self.show_btn = tkinter.Button(self.control_pannel)
+        self.show_btn["text"] = "show"
+        self.show_btn["command"] = self.click_show_btn
+        self.show_btn.pack()
 
         self.clear_btn = tkinter.Button(self.control_pannel)
         self.clear_btn["text"] = "clear"
@@ -46,13 +43,13 @@ class Application(tkinter.Frame):
         self.clear_btn["state"] = "disabled"
         self.clear_btn.pack()
 
-        self.stock_list = tkinter.Listbox(self.stock_list_area)
-        scrollbar = tkinter.Scrollbar(
+        self.stock_list = tkinter.Listbox(self.control_pannel)
+        self.scrollbar = tkinter.Scrollbar(
             self.stock_list, orient=tkinter.VERTICAL, command=self.stock_list.yview
         )
-        scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+        self.scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
         self.stock_list.pack(expand=True, fill=tkinter.BOTH)
-        self.stock_list.config(yscrollcommand=scrollbar.set)
+        self.stock_list.config(yscrollcommand=self.scrollbar.set)
 
         plt.rcParams["font.size"] = 7
         self.fig, self.ax = plt.subplots()
@@ -66,7 +63,6 @@ class Application(tkinter.Frame):
         self.canvas.get_tk_widget().pack(fill=tkinter.BOTH, expand=True)
 
         self.graph_area.pack(side="left")
-        self.stock_list_area.pack(fill=tkinter.BOTH, expand=True)
         self.control_pannel.pack(fill=tkinter.BOTH, expand=True)
 
     def clear_graph(self):
