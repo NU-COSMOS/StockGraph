@@ -79,20 +79,18 @@ class Application(tkinter.Frame):
         plt.close()
         self.root.destroy()
 
-    def add_displayed_list(self):
-        self.displayed_list.append(self.text_box.get())
-        tkinter.Label(self.control_pannel)
+    def add_displayed_list(self, symbol: str):
+        self.displayed_list.append(symbol)
 
     def click_show_btn(self):
-        # リクエスト制限のため、開発中はコメントアウト
-        # self.display_graph()
+        if (symbol := self.text_box.get()) not in self.displayed_list:
+            # リクエスト制限のため、開発中はコメントアウト
+            # self.display_graph()
+            self.add_displayed_list(symbol)
+            self.show_stock_list(symbol)
 
-        self.add_displayed_list()
-        self.show_stock_list()
-
-    def show_stock_list(self):
-        for stock in self.displayed_list:
-            self.stock_list.insert(tkinter.END, f"{stock}")
+    def show_stock_list(self, symbol: str):
+        self.stock_list.insert(tkinter.END, f"{symbol}")
 
     def display_graph(self):
         symbol = self.text_box.get()
