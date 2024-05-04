@@ -13,6 +13,8 @@ class Application(tkinter.Frame):
         self.config = config
         self.screen_width = w
         self.screen_height = h
+
+        self.displayed_list = []  # 表示中の株名一覧を格納する
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
@@ -26,13 +28,16 @@ class Application(tkinter.Frame):
         # コントロールパネル
         self.control_pannel = tkinter.Frame(self)
 
+        # 表示中の株一覧表示エリア
+        self.stock_list_area = tkinter.Frame(self.control_pannel)
+
         self.text_box = tkinter.Entry(self.control_pannel)
         self.text_box["width"] = 10
         self.text_box.pack()
 
         show_btn = tkinter.Button(self.control_pannel)
         show_btn["text"] = "show"
-        show_btn["command"] = self.display_graph
+        show_btn["command"] = self.click_show_btn
         show_btn.pack()
 
         self.clear_btn = tkinter.Button(self.control_pannel)
@@ -40,6 +45,14 @@ class Application(tkinter.Frame):
         self.clear_btn["command"] = self.clear_graph
         self.clear_btn["state"] = "disabled"
         self.clear_btn.pack()
+
+        self.stock_list = tkinter.Listbox(self.stock_list_area)
+        scrollbar = tkinter.Scrollbar(
+            self.stock_list, orient=tkinter.VERTICAL, command=self.stock_list.yview
+        )
+        scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+        self.stock_list.pack(expand=True, fill=tkinter.BOTH)
+        self.stock_list.config(yscrollcommand=scrollbar.set)
 
         plt.rcParams["font.size"] = 7
         self.fig, self.ax = plt.subplots()
@@ -53,7 +66,8 @@ class Application(tkinter.Frame):
         self.canvas.get_tk_widget().pack(fill=tkinter.BOTH, expand=True)
 
         self.graph_area.pack(side="left")
-        self.control_pannel.pack()
+        self.stock_list_area.pack(fill=tkinter.BOTH, expand=True)
+        self.control_pannel.pack(fill=tkinter.BOTH, expand=True)
 
     def clear_graph(self):
         self.ax.clear()
@@ -64,6 +78,19 @@ class Application(tkinter.Frame):
     def on_close(self):
         plt.close()
         self.root.destroy()
+
+    def add_displayed_list(self, symbol: str):
+        self.displayed_list.append(symbol)
+
+    def click_show_btn(self):
+        if (symbol := self.text_box.get()) not in self.displayed_list:
+            # リクエスト制限のため、開発中はコメントアウト
+            # self.display_graph()
+            self.add_displayed_list(symbol)
+            self.show_stock_list(symbol)
+
+    def show_stock_list(self, symbol: str):
+        self.stock_list.insert(tkinter.END, f"{symbol}")
 
     def display_graph(self):
         symbol = self.text_box.get()
