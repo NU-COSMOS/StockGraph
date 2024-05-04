@@ -22,7 +22,7 @@ class Application(tkinter.Frame):
         # Tkinterのwindowが閉じられるときの処理
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-    def create_widgets(self, w_rate: float = 0.7):
+    def create_widgets(self):
         self.create_graph()
         self.create_control_pannel()
 
