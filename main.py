@@ -23,26 +23,53 @@ class Application(tkinter.Frame):
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def create_widgets(self, w_rate: float = 0.7):
-        # グラフ表示エリア
-        self.graph_area = tkinter.Frame(self)
-        # コントロールパネル
+        self.create_graph()
+        self.create_control_pannel()
+
+    def create_control_pannel(self):
         self.control_pannel = tkinter.Frame(self)
 
+        # 表示する株のシンボルを入力するテキストボックス
+        self.create_text_box()
+
+        # 入力されたシンボルに対応する表示を行うボタン
+        self.create_show_btn()
+
+        # 表示しているものをすべて削除するボタン
+        self.create_clear_btn()
+
+        # 描画中のシンボル一覧を表示するリスト
+        self.create_stock_list()
+
+        self.control_pannel.pack(fill=tkinter.BOTH, expand=True)
+
+    def create_text_box(self):
         self.text_box = tkinter.Entry(self.control_pannel)
         self.text_box["width"] = 10
         self.text_box.pack()
 
+    def create_show_btn(self):
         self.show_btn = tkinter.Button(self.control_pannel)
         self.show_btn["text"] = "show"
         self.show_btn["command"] = self.click_show_btn
         self.show_btn.pack()
 
+    def create_clear_btn(self):
         self.clear_btn = tkinter.Button(self.control_pannel)
         self.clear_btn["text"] = "clear"
-        self.clear_btn["command"] = self.clear_graph
+        self.clear_btn["command"] = self.clear
         self.clear_btn["state"] = "disabled"
         self.clear_btn.pack()
 
+    def clear(self):
+        self.clear_graph()
+        self.clear_list()
+
+    def clear_list(self):
+        self.displayed_list = []
+        self.stock_list.delete(0, tkinter.END)
+
+    def create_stock_list(self):
         self.stock_list = tkinter.Listbox(self.control_pannel)
         self.scrollbar = tkinter.Scrollbar(
             self.stock_list, orient=tkinter.VERTICAL, command=self.stock_list.yview
@@ -50,6 +77,9 @@ class Application(tkinter.Frame):
         self.scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
         self.stock_list.pack(expand=True, fill=tkinter.BOTH)
         self.stock_list.config(yscrollcommand=self.scrollbar.set)
+
+    def create_graph(self, w_rate: float = 0.7):
+        self.graph_area = tkinter.Frame(self)
 
         plt.rcParams["font.size"] = 7
         self.fig, self.ax = plt.subplots()
@@ -63,7 +93,6 @@ class Application(tkinter.Frame):
         self.canvas.get_tk_widget().pack(fill=tkinter.BOTH, expand=True)
 
         self.graph_area.pack(side="left")
-        self.control_pannel.pack(fill=tkinter.BOTH, expand=True)
 
     def clear_graph(self):
         self.ax.clear()
@@ -84,6 +113,9 @@ class Application(tkinter.Frame):
             # self.display_graph()
             self.add_displayed_list(symbol)
             self.show_stock_list(symbol)
+
+            # showボタン押下に成功した場合、clearボタンが押せるようにならなければならない
+            self.clear_btn["state"] = "normal"
 
     def show_stock_list(self, symbol: str):
         self.stock_list.insert(tkinter.END, f"{symbol}")
