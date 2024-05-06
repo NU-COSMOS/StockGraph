@@ -145,6 +145,7 @@ def main():
 
     root = tkinter.Tk()
     root.title("StockGraph")
+    root.iconphoto(True, tkinter.PhotoImage(file="./icon.png"))
     root.state("normal")
     app = Application(
         root=root,
