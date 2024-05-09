@@ -1,5 +1,6 @@
 import requests
 import tkinter
+from tkinter.constants import END
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -116,6 +117,9 @@ class Application(tkinter.Frame):
 
             # showボタン押下に成功した場合、clearボタンが押せるようにならなければならない
             self.clear_btn["state"] = "normal"
+
+            # showボタン押下でテキストボックスを空にする
+            self.text_box.delete(0, END)
 
     def show_stock_list(self, symbol: str):
         self.stock_list.insert(tkinter.END, f"{symbol}")
