@@ -46,7 +46,13 @@ class Application(tkinter.Frame):
 
         self.control_pannel.pack(fill=tkinter.BOTH, expand=True)
 
-    def on_listbox_select(self, event):
+    def change_clear_btn_state(self, event=None):
+        if self.stock_list.size() > 0:
+            self.clear_btn["state"] = tkinter.NORMAL
+        else:
+            self.clear_btn["state"] = tkinter.DISABLED
+
+    def on_listbox_select(self, event=None):
         # 選択されているアイテムがある場合、削除ボタンを有効にする
         if self.stock_list.curselection():
             self.del_btn.config(state=tkinter.NORMAL)
@@ -57,10 +63,12 @@ class Application(tkinter.Frame):
         # リストボックスから選択したシンボルを削除
         self.stock_list.delete(ANCHOR)
 
+        self.stock_list.event_generate("<<ListboxUpdate>>")
+
         # グラフを再描画
         # self.display_graph()
 
-        self.del_btn["state"] = tkinter.DISABLED
+        self.on_listbox_select()
 
     def create_delete_btn(self):
         self.del_btn = tkinter.Button(self.control_pannel)
@@ -92,15 +100,15 @@ class Application(tkinter.Frame):
         self.clear_btn = tkinter.Button(self.control_pannel)
         self.clear_btn["text"] = "clear"
         self.clear_btn["command"] = self.clear
-        self.clear_btn["state"] = "disabled"
+        self.clear_btn["state"] = tkinter.DISABLED
         self.clear_btn.pack()
 
     def clear(self):
         self.clear_graph()
         self.clear_list()
 
-        # 選択されていようがいまいがdeleteボタンは押せなくなる
-        self.del_btn["state"] = tkinter.DISABLED
+        self.stock_list.event_generate("<<ListboxUpdate>>")
+        self.on_listbox_select()
 
     def clear_list(self):
         self.stock_list.delete(0, END)
@@ -116,6 +124,9 @@ class Application(tkinter.Frame):
 
         # Listboxの選択イベントにバインド
         self.stock_list.bind("<<ListboxSelect>>", self.on_listbox_select)
+        self.stock_list.bind("<<ListboxUpdate>>", self.change_clear_btn_state)
+
+        self.stock_list.event_generate("<<ListboxUpdate>>")
 
     def create_graph(self, w_rate: float = 0.7):
         self.graph_area = tkinter.Frame(self)
@@ -137,7 +148,6 @@ class Application(tkinter.Frame):
         self.ax.clear()
         self.ax.grid()
         self.canvas.draw()
-        self.clear_btn["state"] = "disabled"
 
     def on_close(self):
         plt.close()
@@ -149,11 +159,10 @@ class Application(tkinter.Frame):
             # self.display_graph()
             self.show_stock_list(symbol)
 
-            # showボタン押下に成功した場合、clearボタンが押せるようにならなければならない
-            self.clear_btn["state"] = "normal"
-
             # showボタン押下でテキストボックスを空にする
             self.text_box.delete(0, END)
+
+            self.stock_list.event_generate("<<ListboxUpdate>>")
 
     def show_stock_list(self, symbol: str):
         self.stock_list.insert(tkinter.END, f"{symbol}")
@@ -173,8 +182,6 @@ class Application(tkinter.Frame):
         self.ax.xaxis.set_major_locator(mdates.DayLocator(interval=15))
         self.ax.grid()
         self.canvas.draw()
-
-        self.clear_btn["state"] = "normal"
 
 
 def main():
