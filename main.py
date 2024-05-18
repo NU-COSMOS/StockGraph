@@ -1,6 +1,6 @@
 import requests
 import tkinter
-from tkinter.constants import END
+from tkinter.constants import END, ANCHOR
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -15,7 +15,6 @@ class Application(tkinter.Frame):
         self.screen_width = w
         self.screen_height = h
 
-        self.displayed_list = []  # 表示中の株名一覧を格納する
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
@@ -39,10 +38,41 @@ class Application(tkinter.Frame):
         # 表示しているものをすべて削除するボタン
         self.create_clear_btn()
 
+        # 選択中の株を削除するボタン
+        self.create_delete_btn()
+
         # 描画中のシンボル一覧を表示するリスト
         self.create_stock_list()
 
         self.control_pannel.pack(fill=tkinter.BOTH, expand=True)
+
+    def change_clear_btn_state(self, event=None):
+        if self.stock_list.size() > 0:
+            self.clear_btn["state"] = tkinter.NORMAL
+        else:
+            self.clear_btn["state"] = tkinter.DISABLED
+
+    def on_listbox_select(self, event=None):
+        # 選択されているアイテムがある場合、削除ボタンを有効にする
+        if self.stock_list.curselection():
+            self.del_btn.config(state=tkinter.NORMAL)
+        else:
+            self.del_btn.config(state=tkinter.DISABLED)
+
+    def click_delete_btn(self):
+        # リストボックスから選択したシンボルを削除
+        self.stock_list.delete(ANCHOR)
+
+        self.stock_list.event_generate("<<ListboxUpdate>>")
+
+        self.on_listbox_select()
+
+    def create_delete_btn(self):
+        self.del_btn = tkinter.Button(self.control_pannel)
+        self.del_btn["text"] = "delete"
+        self.del_btn["command"] = self.click_delete_btn
+        self.del_btn["state"] = tkinter.DISABLED
+        self.del_btn.pack()
 
     def create_text_box(self):
         self.text_box = tkinter.Entry(self.control_pannel)
@@ -59,16 +89,18 @@ class Application(tkinter.Frame):
         self.clear_btn = tkinter.Button(self.control_pannel)
         self.clear_btn["text"] = "clear"
         self.clear_btn["command"] = self.clear
-        self.clear_btn["state"] = "disabled"
+        self.clear_btn["state"] = tkinter.DISABLED
         self.clear_btn.pack()
 
     def clear(self):
         self.clear_graph()
         self.clear_list()
 
+        self.stock_list.event_generate("<<ListboxUpdate>>")
+        self.on_listbox_select()
+
     def clear_list(self):
-        self.displayed_list = []
-        self.stock_list.delete(0, tkinter.END)
+        self.stock_list.delete(0, END)
 
     def create_stock_list(self):
         self.stock_list = tkinter.Listbox(self.control_pannel)
@@ -78,6 +110,12 @@ class Application(tkinter.Frame):
         self.scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
         self.stock_list.pack(expand=True, fill=tkinter.BOTH)
         self.stock_list.config(yscrollcommand=self.scrollbar.set)
+
+        # Listboxの選択イベントにバインド
+        self.stock_list.bind("<<ListboxSelect>>", self.on_listbox_select)
+        self.stock_list.bind("<<ListboxUpdate>>", self.change_clear_btn_state)
+
+        self.stock_list.event_generate("<<ListboxUpdate>>")
 
     def create_graph(self, w_rate: float = 0.7):
         self.graph_area = tkinter.Frame(self)
@@ -99,27 +137,21 @@ class Application(tkinter.Frame):
         self.ax.clear()
         self.ax.grid()
         self.canvas.draw()
-        self.clear_btn["state"] = "disabled"
 
     def on_close(self):
         plt.close()
         self.root.destroy()
 
-    def add_displayed_list(self, symbol: str):
-        self.displayed_list.append(symbol)
-
     def click_show_btn(self):
-        if (symbol := self.text_box.get()) not in self.displayed_list:
+        if (symbol := self.text_box.get()) not in self.stock_list.get(0, END):
             # リクエスト制限のため、開発中はコメントアウト
             # self.display_graph()
-            self.add_displayed_list(symbol)
             self.show_stock_list(symbol)
-
-            # showボタン押下に成功した場合、clearボタンが押せるようにならなければならない
-            self.clear_btn["state"] = "normal"
 
             # showボタン押下でテキストボックスを空にする
             self.text_box.delete(0, END)
+
+            self.stock_list.event_generate("<<ListboxUpdate>>")
 
     def show_stock_list(self, symbol: str):
         self.stock_list.insert(tkinter.END, f"{symbol}")
@@ -129,7 +161,7 @@ class Application(tkinter.Frame):
         api_key = self.config["ALPHA_VANTAGE_KEY"]
         url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}"
         response = requests.get(url)
-        data = response.json()
+        data: dict[str, dict] = response.json()
 
         daily_data: dict = dict(reversed(data["Time Series (Daily)"].items()))
         date_list = daily_data.keys()
@@ -139,8 +171,6 @@ class Application(tkinter.Frame):
         self.ax.xaxis.set_major_locator(mdates.DayLocator(interval=15))
         self.ax.grid()
         self.canvas.draw()
-
-        self.clear_btn["state"] = "normal"
 
 
 def main():
