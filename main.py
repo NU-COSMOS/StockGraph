@@ -65,9 +65,6 @@ class Application(tkinter.Frame):
 
         self.stock_list.event_generate("<<ListboxUpdate>>")
 
-        # グラフを再描画
-        # self.display_graph()
-
         self.on_listbox_select()
 
     def create_delete_btn(self):
@@ -76,14 +73,6 @@ class Application(tkinter.Frame):
         self.del_btn["command"] = self.click_delete_btn
         self.del_btn["state"] = tkinter.DISABLED
         self.del_btn.pack()
-
-    # def redraw_graph(self):
-    #     self.clear_graph()
-    #     for symbol in self.displayed_list:
-    #         date_list, close_list = self.stock_data[symbol]
-    #         self.ax.plot(date_list, close_list, label=symbol)
-    #     self.ax.legend()
-    #     self.canvas.draw()
 
     def create_text_box(self):
         self.text_box = tkinter.Entry(self.control_pannel)
