@@ -15,7 +15,6 @@ class Application(tkinter.Frame):
         self.screen_width = w
         self.screen_height = h
 
-        self.displayed_list = []  # 表示中の株名一覧を格納する
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
@@ -55,16 +54,11 @@ class Application(tkinter.Frame):
             self.del_btn.config(state=tkinter.DISABLED)
 
     def click_delete_btn(self):
-        # 表示中のシンボルを内部保持しているリストから削除
-        selected_index = self.stock_list.curselection()[0]
-        selected_value = self.stock_list.get(selected_index)
-        self.displayed_list.remove(selected_value)
-
         # リストボックスから選択したシンボルを削除
         self.stock_list.delete(ANCHOR)
 
         # グラフを再描画
-        self.display_graph()
+        # self.display_graph()
 
         self.del_btn["state"] = tkinter.DISABLED
 
@@ -105,8 +99,10 @@ class Application(tkinter.Frame):
         self.clear_graph()
         self.clear_list()
 
+        # 選択されていようがいまいがdeleteボタンは押せなくなる
+        self.del_btn["state"] = tkinter.DISABLED
+
     def clear_list(self):
-        self.displayed_list = []
         self.stock_list.delete(0, END)
 
     def create_stock_list(self):
@@ -147,14 +143,10 @@ class Application(tkinter.Frame):
         plt.close()
         self.root.destroy()
 
-    def add_displayed_list(self, symbol: str):
-        self.displayed_list.append(symbol)
-
     def click_show_btn(self):
-        if (symbol := self.text_box.get()) not in self.displayed_list:
+        if (symbol := self.text_box.get()) not in self.stock_list.get(0, END):
             # リクエスト制限のため、開発中はコメントアウト
-            self.display_graph()
-            self.add_displayed_list(symbol)
+            # self.display_graph()
             self.show_stock_list(symbol)
 
             # showボタン押下に成功した場合、clearボタンが押せるようにならなければならない
