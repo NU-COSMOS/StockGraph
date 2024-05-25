@@ -15,6 +15,10 @@ class Application(tkinter.Frame):
         self.screen_width = w
         self.screen_height = h
 
+        # APIで取得した株価データを保持する
+        # キーはシンボル, 中身はresponse.json()
+        self.data: dict[str, dict[str, dict]] = {}
+
         self.pack()
         self.pack_propagate(0)
         self.create_widgets()
@@ -158,12 +162,16 @@ class Application(tkinter.Frame):
 
     def display_graph(self):
         symbol = self.text_box.get()
-        api_key = self.config["ALPHA_VANTAGE_KEY"]
-        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}"
-        response = requests.get(url)
-        data: dict[str, dict] = response.json()
 
-        daily_data: dict = dict(reversed(data["Time Series (Daily)"].items()))
+        if not symbol in self.data.keys():
+            api_key = self.config["ALPHA_VANTAGE_KEY"]
+            url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}"
+            response = requests.get(url)
+            self.data[symbol] = response.json()
+
+        daily_data: dict = dict(
+            reversed(self.data[symbol]["Time Series (Daily)"].items())
+        )
         date_list = daily_data.keys()
         close_list = [float(x["4. close"]) for x in daily_data.values()]
 
